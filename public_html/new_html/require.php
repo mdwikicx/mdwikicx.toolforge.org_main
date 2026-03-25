@@ -12,10 +12,10 @@ if ($env === 'development' && file_exists(__DIR__ . '/load_env.php')) {
     include_once __DIR__ . '/load_env.php';
 }
 
-$home = getenv('HOME') ?: ($_SERVER['HOME'] ?? '');
+$home = getenv('HOME') ?: ($_ENV['HOME'] ?? '');
 
 if (!defined('REVISIONS_PATH')) {
-    $env_value = getenv('REVISIONS_DIR_0') ?: ($_SERVER['REVISIONS_DIR_0'] ?? null);
+    $env_value = getenv('REVISIONS_DIR_0') ?: ($_ENV['REVISIONS_DIR_0'] ?? null);
     if ($env_value) {
         $rev_path = $env_value;
     } else {

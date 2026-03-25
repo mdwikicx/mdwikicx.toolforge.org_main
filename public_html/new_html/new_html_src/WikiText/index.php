@@ -7,10 +7,9 @@ use function Wikitext\get_wikitext;
 */
 
 use function Post\handle_url_request;
-use function PostMdwiki\handle_url_request_mdwiki;
-// use function Post\post_url_params_result;
 use function FixText\fix_wikitext;
 use function Lead\get_lead_section;
+use function Fixes\ExpendRefs\refs_expend_work;
 use function NewHtml\JsonData\add_title_revision;
 use function Printn\test_print;
 
@@ -27,8 +26,7 @@ function get_wikitext_from_mdwiki_api($title)
     ];
     $url = "https://mdwiki.org/w/api.php";
 
-    // $req = post_url_params_result($url, $params);
-    $req = handle_url_request_mdwiki($url, 'GET', $params);
+    $req = handle_url_request($url, 'GET', $params);
 
     if ($req === false) {
         test_print("Failed to fetch data from MDWiki API for title: $title");
@@ -56,8 +54,7 @@ function get_wikitext_from_mdwiki_restapi($title)
     $title2 = str_replace(" ", "_", $title2);
     $url = "https://mdwiki.org/w/rest.php/v1/page/" . $title2;
 
-    // $req = post_url_params_result($url);
-    $req = handle_url_request_mdwiki($url, 'GET');
+    $req = handle_url_request($url, 'GET');
     $json1 = json_decode($req, true);
 
     $source = $json1["source"] ?? '';
@@ -73,17 +70,15 @@ function get_wikitext($title, $all)
     // ---
     $json1 = get_wikitext_from_mdwiki_restapi($title);
     // ---
-    $source = $json1[0];
-    $revid = $json1[1];
-    // ---
-    // if $source match #REDIRECT [[.*?]] then get the wikitext from target page
-    if (preg_match('/#REDIRECT \[\[(.*?)\]\]/i', $source, $matches)) {
+    // if $json1[0] match #REDIRECT [[.*?]] then get the wikitext from target page
+    if (preg_match('/#REDIRECT \[\[(.*?)\]\]/i', $json1[0], $matches)) {
         $title = $matches[1];
         test_print("Redirecting to: $title\n");
         $json1 = get_wikitext_from_mdwiki_restapi($title);
-        $source = $json1[0];
-        $revid = $json1[1];
     }
+    // ---
+    $source = $json1[0];
+    $revid = $json1[1];
     // ---
     if ($source != '') {
         // ---
@@ -91,9 +86,12 @@ function get_wikitext($title, $all)
         // ---
         if ($all == '') {
             test_print("get_lead_section: \n");
-            $source = get_lead_section($source);
+            $full_text = $source;
+            $lead = get_lead_section($full_text);
+            if (!empty($lead)) {
+                $source = refs_expend_work($lead, $full_text);
+            }
         }
-        // ---
         $source = fix_wikitext($source, $title);
     }
     // ---

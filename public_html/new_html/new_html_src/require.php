@@ -12,7 +12,6 @@ require_once __DIR__ . "/fix_wikitext.php";
 
 require_once __DIR__ . "/file_helps.php";
 require_once __DIR__ . "/post.php";
-require_once __DIR__ . "/post_mdwiki.php";
 require_once __DIR__ . "/fix_html.php";
 require_once __DIR__ . "/html_to_Segments.php";
 require_once __DIR__ . "/wikitext_to_html.php";

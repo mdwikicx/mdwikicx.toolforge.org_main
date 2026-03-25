@@ -4,7 +4,6 @@ namespace Post;
 /*
 
 use function Post\handle_url_request;
-use function Post\post_url_params_result;
 
 */
 // https://mdwiki.org/w/rest.php/v1/page/Sympathetic_crashing_acute_pulmonary_edema/html
@@ -12,56 +11,19 @@ use function Post\post_url_params_result;
 
 use function Printn\test_print;
 
-$usr_agent = 'WikiProjectMed Translation Dashboard/1.0 (https://medwiki.toolforge.org/; tools.medwiki@toolforge.org)';
-
-function post_url_params_result(string $endPoint, array $params = []): string
-{
-    global $usr_agent;
-    $ch = curl_init();
-
-    $url = "{$endPoint}";
-
-    curl_setopt($ch, CURLOPT_URL, $endPoint);
-
-    if (count($params) > 0) {
-        $url = "{$endPoint}?" . http_build_query($params);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-    }
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-
-    test_print($url);
-
-    $output = curl_exec($ch);
-    if ($output === FALSE) {
-        test_print("endPoint: ($endPoint), cURL Error: " . curl_error($ch));
-        curl_close($ch);
-        return '';
-    }
-    // Check HTTP response code
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    if ($http_code !== 200) {
-        test_print("API returned HTTP $http_code: $http_code");
-        // return ['error' => "Error: API returned HTTP $http_code"];
-    }
-    curl_close($ch);
-    return $output;
-}
-
 function handle_url_request(string $endPoint, string $method = 'GET', array $params = []): string
 {
-    global $usr_agent;
+    $usr_agent = 'WikiProjectMed Translation Dashboard/1.0 (https://mdwikicx.toolforge.org/; tools.mdwikicx@toolforge.org)';
 
     $ch = curl_init();
 
     $url = $endPoint;
+    $printableUrl = $endPoint;
 
     if (!empty($params) && $method === 'GET') {
         $query_string = http_build_query($params);
         $url = strpos($url, '?') === false ? "$url?$query_string" : "$url&$query_string";
+        $printableUrl = $url;
         $endPoint = $url;
     }
 
@@ -73,11 +35,12 @@ function handle_url_request(string $endPoint, string $method = 'GET', array $par
     }
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // curl_setopt($ch, CURLOPT_COOKIEJAR, "cookie.txt");
     curl_setopt($ch, CURLOPT_USERAGENT, $usr_agent);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
-    test_print($url);
+    test_print($printableUrl);
 
     $output = curl_exec($ch);
 
@@ -89,8 +52,20 @@ function handle_url_request(string $endPoint, string $method = 'GET', array $par
 
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($http_code !== 200) {
+        error_log("HttpClientService: API returned HTTP $http_code for URL: $printableUrl");
+
+        // Check for Cloudflare protection
+        $isCloudflareProtected = false;
+        if (is_string($output) && str_contains($output, 'Just a moment...')) {
+            $isCloudflareProtected = true;
+            error_log("HttpClientService: Cloudflare protection detected for URL: $printableUrl");
+            test_print("Cloudflare protection detected: 'Just a moment...' page returned");
+        }
+
         test_print("API returned HTTP $http_code: $http_code");
-        test_print(var_export($output, true));
+        if (!$isCloudflareProtected) {
+            test_print(var_export($output, true));
+        }
         $output = '';
     }
 
