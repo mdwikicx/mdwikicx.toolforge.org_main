@@ -1,7 +1,7 @@
 *.7z
 *.env
-new_html/load_env.php
-/revisions
-revisions_new/*/*.txt
-revisions_new/*/*.html
-w/ContentTranslation-repo.lnk
+public_html/new_html/load_env.php
+public_html/revisions
+public_html/revisions_new/*/*.txt
+public_html/revisions_new/*/*.html
+public_html/w/ContentTranslation-repo.lnk
