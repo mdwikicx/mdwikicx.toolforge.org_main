@@ -1,0 +1,7 @@
+# tfj run dbbackup --image mariadb --command "$HOME/jobs/db_backup.sh"
+# sql backup
+- name: backup
+  command: "$HOME/jobs/db_backup.sh"
+  schedule: '@weekly'
+  image: mariadb
+  emails: none
