@@ -48,6 +48,7 @@ function do_html_to_seg($text)
     // $result = str_replace("https://medwiki.toolforge.org/wiki/", "https://en.wikipedia.org/wiki/", $result);
     // ---
     if ($result == 'Content for translate is not given or is empty') return "";
+    if ($result == 'Sectionwrap: Attempting to remove a non-section tag: undefined') return "";
     // ---
     return $result;
 }
