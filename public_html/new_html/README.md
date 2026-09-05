@@ -1,5 +1,7 @@
 # DEPRECATED
 
+> live at [https://mdwikicx.toolforge.org/new_html](https://mdwikicx.toolforge.org/new_html)
+
 -   This repository has been moved to: [mdwikicx/new_html](https://github.com/mdwikicx/new_html)
 
 # Overview
